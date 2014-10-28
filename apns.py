@@ -27,6 +27,7 @@ from binascii import a2b_hex, b2a_hex
 from datetime import datetime
 from socket import socket, AF_INET, SOCK_STREAM
 from struct import pack, unpack
+import ssl
 
 try:
     from ssl import wrap_socket
@@ -123,7 +124,7 @@ class APNsConnection(object):
         # Establish an SSL connection
         self._socket = socket(AF_INET, SOCK_STREAM)
         self._socket.connect((self.server, self.port))
-        self._ssl = wrap_socket(self._socket, self.key_file, self.cert_file)
+        self._ssl = wrap_socket(self._socket, self.key_file, self.cert_file, ssl_version=ssl.PROTOCOL_TLSv1)
 
     def _disconnect(self):
         if self._socket:
@@ -193,9 +194,9 @@ class Payload(object):
             d['sound'] = self.sound
         if self.badge is not None:
             d['badge'] = int(self.badge)
-        
+
         d['content-available'] = self.content_available
-        
+
         d = { 'aps': d }
         d.update(self.custom)
         return d
